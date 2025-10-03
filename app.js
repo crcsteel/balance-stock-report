@@ -112,9 +112,9 @@ document.getElementById('exportBtn').addEventListener('click', function() {
     exportData.push({}); // แทรกแถวว่างก่อนรวม
     exportData.push({
         'Group': 'รวมทั้งหมด',
-        'Weight Surin (ตัน)': totalWeightSurin.toFixed(2),
-        'Weight Nangrong (ตัน)': totalWeightNangrong.toFixed(2),
-        'Weight Det Udom (ตัน)': totalWeightDetUdom.toFixed(2),
+        'Weight Surin (ตัน)': totalWeightSurin,
+        'Weight Nangrong (ตัน)': totalWeightNangrong,
+        'Weight Det Udom (ตัน)': totalWeightDetUdom,
         'Cost Surin (บาท)': totalCostSurin,
         'Cost Nangrong (บาท)': totalCostNangrong,
         'Cost Det Udom (บาท)': totalCostDetUdom

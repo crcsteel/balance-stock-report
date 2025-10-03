@@ -96,19 +96,25 @@
         <div class="header-card border border-slate-200 rounded-xl shadow-sm mb-6 p-auto px-6 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                        <img src="logo-crc.png" alt="CRC Logo" class="h-12 w-auto">
+                    <img src="logo-crc.png" alt="CRC Logo" class="h-12 w-auto">
                     <div>
                         <h1 class="text-3xl font-bold">Balance Stock Report</h1>
-                        <p>รายงานสต็อกเหล็กทุกสาขา</p>
+                        <p class="text-slate-600">รายงานสต็อกเหล็กทุกสาขา</p>
                     </div>
                 </div>
-                <button id="exportBtn" class="excel-button text-white px-6 py-2 rounded-xl font-medium transition-colors duration-100 flex items-center space-x-2">
-                    <i class="fas fa-file-excel"></i>
-                    <span>Export</span>
-                </button>
+                <div class="text-right">
+                    <button id="exportBtn" class="excel-button text-white px-6 py-2 rounded-xl font-medium transition-colors duration-100 flex items-center space-x-2 mb-2">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
             </div>
         </div>
-
+<div class="text-right p-4">
+  <p class="text-sm text-slate-500">
+    อัปเดตล่าสุด: <span id="lastUpdate"></span>
+  </p>
+</div>
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <!-- Weight Summary -->
@@ -174,7 +180,7 @@
             </div>
             
             <div class="overflow-x-auto">
-                <table id="inventoryTable">
+                <table id="inventoryTable" class="display w-full">
                     <thead class="bg-slate-100 text-blue-800">
                         <tr>
                             <th>Group</th>
@@ -195,5 +201,53 @@
     </div>
 
 <script src="app.js"></script>
+
+<script>
+const SHEET_IDLASTUPDATE = '1N_qX_beldGyLspfU6lgeskWd-aYu6ugAhRFTrHgO_Sw';
+const SHEET_NAMELASTUPDATE = 'Import Stock';
+// 👉 ใช้ query select H limit 1 offset 0 → จะได้ค่า H1
+const API_URL_LASTUPDATE = `https://docs.google.com/spreadsheets/d/${SHEET_IDLASTUPDATE}/gviz/tq?tq=select H limit 1 offset 0&sheet=${SHEET_NAMELASTUPDATE}&tqx=out:json`;
+
+async function fetchLastUpdate() {
+  try {
+    const res = await fetch(API_URL_LASTUPDATE);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+
+    const cell = json.table.rows[0]?.c[0];  // 👉 H1
+    let formatted = "";
+
+    if (cell?.f) {
+      // ถ้ามี format string (Google Sheets แปลงแล้ว)
+      formatted = cell.f;
+    } else if (cell?.v) {
+      if (typeof cell.v === "string" && cell.v.startsWith("Date(")) {
+        const parts = cell.v.match(/\d+/g).map(Number);
+        const d = new Date(parts[0], parts[1], parts[2], parts[3]||0, parts[4]||0, parts[5]||0);
+        formatted = d.toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Asia/Bangkok'
+        });
+      } else {
+        formatted = cell.v;
+      }
+    } else {
+      formatted = "ไม่มีข้อมูล";
+    }
+
+    document.getElementById('lastUpdate').textContent = formatted;
+  } catch (err) {
+    console.error("โหลด lastUpdate ไม่สำเร็จ:", err);
+    document.getElementById('lastUpdate').textContent = "ไม่สามารถโหลดข้อมูล";
+  }
+}
+
+fetchLastUpdate();
+</script>
+
 </body>
 </html>
