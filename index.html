@@ -88,9 +88,31 @@
         .excel-button {
             background-color: #009b2e !important;
         }
+        /* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, #e0e7ff 25%, #f8fafc 50%, #e0e7ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  height: 1rem;
+  border-radius: 0.25rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
     </style>
 </head>
 <body>
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="fixed inset-0 bg-white/90 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
+  <div class="flex flex-col items-center space-y-4">
+    <div class="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-blue-600 text-xl font-semibold animate-pulse">กำลังโหลดข้อมูล...</p>
+  </div>
+</div>
+
     <div class="container mx-auto py-6">
         <!-- Header -->
         <div class="header-card border border-slate-200 rounded-xl shadow-sm mb-6 p-auto px-6 py-4">
@@ -203,6 +225,13 @@
 <script src="app.js"></script>
 
 <script>
+  // เมื่อโหลดหน้าเสร็จ จะ fade-out หน้ากำลังโหลด
+  window.addEventListener('load', () => {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('opacity-0');
+    setTimeout(() => overlay.style.display = 'none', 500);
+  });
+
 const SHEET_IDLASTUPDATE = '1N_qX_beldGyLspfU6lgeskWd-aYu6ugAhRFTrHgO_Sw';
 const SHEET_NAMELASTUPDATE = 'Import Stock';
 // 👉 ใช้ query select H limit 1 offset 0 → จะได้ค่า H1

@@ -4,20 +4,54 @@ const API_URL_INVENTORY = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gv
 
 // ---- Helper ดึงและแปลงข้อมูล ----
 async function fetchSheetData(url) {
+  // 🔹 แสดง skeleton ระหว่างโหลด
+  $('#inventoryTable tbody').html(`
+    <tr>
+      <td colspan="7" class="text-center py-8">
+        <div class="flex flex-col items-center space-y-3">
+          <div class="w-14 h-14 border-4 border-blue-300 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-slate-500 text-base animate-pulse">
+            กำลังโหลดข้อมูลจาก Google Sheets...
+          </span>
+        </div>
+      </td>
+    </tr>
+  `);
+
+  try {
     const res = await fetch(url);
     const text = await res.text();
     const json = JSON.parse(text.substring(47).slice(0, -2)); // clean gviz response
     const table = json.table;
 
-    return table.rows.map(row => ({
-        group: row.c[0]?.v || "",
-        weightSurin: parseFloat(row.c[1]?.v) || 0,
-        weightNangrong: parseFloat(row.c[2]?.v) || 0,
-        weightDetUdom: parseFloat(row.c[3]?.v) || 0,
-        costSurin: parseFloat(row.c[4]?.v) || 0,
-        costNangrong: parseFloat(row.c[5]?.v) || 0,
-        costDetUdom: parseFloat(row.c[6]?.v) || 0
+    const rows = table.rows.map(row => ({
+      group: row.c[0]?.v || "",
+      weightSurin: parseFloat(row.c[1]?.v) || 0,
+      weightNangrong: parseFloat(row.c[2]?.v) || 0,
+      weightDetUdom: parseFloat(row.c[3]?.v) || 0,
+      costSurin: parseFloat(row.c[4]?.v) || 0,
+      costNangrong: parseFloat(row.c[5]?.v) || 0,
+      costDetUdom: parseFloat(row.c[6]?.v) || 0
     }));
+
+    // 🔹 เพิ่มเอฟเฟกต์ fade-in ให้ตาราง
+    $('#inventoryTable').css({ opacity: 0 });
+    setTimeout(() => {
+      $('#inventoryTable').animate({ opacity: 1 }, 400);
+    }, 150);
+
+    return rows;
+  } catch (error) {
+    console.error("❌ โหลดข้อมูลไม่สำเร็จ:", error);
+    $('#inventoryTable tbody').html(`
+      <tr>
+        <td colspan="7" class="text-center py-6 text-red-500">
+          ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้
+        </td>
+      </tr>
+    `);
+    return [];
+  }
 }
 
 // ---- Format ตัวเลขไทย ----
